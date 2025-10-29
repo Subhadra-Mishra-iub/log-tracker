@@ -337,8 +337,8 @@ This project demonstrates several key skills:
 
 **Subhadra Mishra**  
 Email: subhadramishrag@gmail.com  
-LinkedIn: [Your LinkedIn Profile]  
-GitHub: [Your GitHub Profile]
+LinkedIn: https://www.linkedin.com/in/subhadra-mishra/  
+GitHub: https://github.com/Subhadra-Mishra-iub
 
 ---
 
