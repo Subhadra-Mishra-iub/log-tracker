@@ -343,3 +343,26 @@ GitHub: [Your GitHub Profile]
 ---
 
 *This project was built as a demonstration of modern log analysis techniques, combining machine learning, data engineering, and software engineering best practices. The goal is to create a tool that's both technically sophisticated and practically useful for real-world operations teams.*
+
+## Why this matters
+Modern systems emit huge volumes of logs. This tool demonstrates how I combine ML and rule-based detection to surface real issues fast, automate alerts, and present insights visually — mirroring real SRE/QA workflows.
+
+## Screenshots
+### Dashboard
+![Dashboard](assets/screenshot-dashboard.png)
+
+## Quick demo with sample log
+
+
+
+## Why this matters
+Modern systems emit huge volumes of logs. This tool demonstrates how I combine ML and rule-based detection to surface real issues fast, automate alerts, and present insights visually — mirroring real SRE/QA workflows.
+
+## Screenshots
+### Dashboard
+![Dashboard](assets/screenshot-dashboard.png)
+
+## Quick demo with sample log
+```bash
+python log_analyzer.py --log-file logs/sample.log
+```

@@ -3,3 +3,5 @@
 *.txt
 venv/
 __pycache__/
+
+!assets/*.png
