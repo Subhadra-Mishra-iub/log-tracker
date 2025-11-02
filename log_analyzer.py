@@ -463,12 +463,20 @@ def main():
     # Optional email configuration
     email_config = None
     if args.email:
+        import os
+        # Try to load .env file if python-dotenv is available
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            pass  # .env loading is optional
+        
         email_config = {
-            'from_email': 'subhadramishrag@gmail.com',  # Configure this
+            'from_email': os.getenv('SMTP_FROM_EMAIL', 'subhadramishrag@gmail.com'),  # Use env var or default
             'to_email': args.email,
-            'smtp_server': 'smtp.gmail.com',
-            'smtp_port': 587,
-            'password': 'your_app_password'  # Use app password for Gmail
+            'smtp_server': os.getenv('SMTP_SERVER', 'smtp.gmail.com'),
+            'smtp_port': int(os.getenv('SMTP_PORT', '587')),
+            'password': os.getenv('SMTP_PASSWORD', 'your_app_password')  # Must set via environment variable
         }
     
     # Run analysis
