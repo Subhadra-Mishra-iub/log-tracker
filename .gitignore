@@ -5,3 +5,19 @@ venv/
 __pycache__/
 
 !assets/*.png
+
+# Credentials and secrets
+.env
+.env.local
+*.key
+*.pem
+*.p12
+credentials.json
+config.json
+secrets.yaml
+secrets.yml
+**/credentials/**
+**/secrets/**
+*.credentials
+app_password.txt
+smtp_credentials.txt
