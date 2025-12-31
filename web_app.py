@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Streamlit Web App for AI-Based Log Anomaly Checker
-Upload log files and get instant anomaly analysis with visualizations.
+Log Anomaly Checker Web App
 """
 
 import streamlit as st
@@ -15,7 +14,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# Page configuration
 st.set_page_config(
     page_title="AI Log Anomaly Checker",
     page_icon="🔍",
@@ -23,7 +21,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -60,34 +57,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
-    # Header
     st.markdown('<h1 class="main-header">🔍 AI-Based Log Anomaly Checker</h1>', unsafe_allow_html=True)
     st.markdown("Upload your log files and get instant anomaly detection with ML-powered analysis!")
     
-    # Sidebar
     with st.sidebar:
         st.header("📁 Upload Log File")
         
-        # File uploader
         uploaded_file = st.file_uploader(
             "Choose a log file",
             type=['log', 'txt'],
             help="Upload a log file in standard format: YYYY-MM-DD HH:MM:SS LEVEL [SERVICE] MESSAGE"
         )
         
-        # Email configuration
         st.header("📧 Email Alerts (Optional)")
         email = st.text_input("Email address for alerts", placeholder="your@email.com")
         
-        # Analysis options
         st.header("⚙️ Analysis Options")
         show_ml_detection = st.checkbox("Enable ML Detection", value=True)
         show_pattern_detection = st.checkbox("Enable Pattern Detection", value=True)
         
-        # Sample data
         st.header("🧪 Try Sample Data")
         if st.button("Load Sample Security Log"):
-            # Create a temporary sample file
             sample_data = """2024-01-15 10:30:15 INFO [UserService] User login successful: user_id=12345
 2024-01-15 10:30:16 ERROR [DatabaseService] Connection timeout after 30s
 2024-01-15 10:30:17 WARN [CacheService] High memory usage detected: 95%
@@ -101,44 +91,30 @@ def main():
                 f.write(sample_data)
                 uploaded_file = f.name
     
-    # Main content area
     if uploaded_file is not None:
-        # Process the uploaded file
         if isinstance(uploaded_file, str):
-            # Sample data
             file_path = uploaded_file
             file_name = "Sample Security Log"
         else:
-            # Real uploaded file
             file_name = uploaded_file.name
             
-            # Save uploaded file temporarily
             with tempfile.NamedTemporaryFile(mode='wb', suffix='.log', delete=False) as f:
                 f.write(uploaded_file.getbuffer())
                 file_path = f.name
         
-        # Run analysis
         with st.spinner(f"Analyzing {file_name}..."):
             try:
-                # Initialize analyzer
                 analyzer = LogAnalyzer(file_path)
-                
-                # Parse logs
                 analyzer.parse_logs()
                 
-                # Run detection based on options
                 if show_ml_detection:
                     analyzer.detect_anomalies_ml()
                 if show_pattern_detection:
                     analyzer.detect_anomalies_patterns()
                 
-                # Calculate statistics
                 analyzer.calculate_statistics()
-                
-                # Generate report
                 anomalies_df = analyzer.generate_report()
                 
-                # Clean up temporary file
                 if isinstance(uploaded_file, str):
                     os.unlink(file_path)
                 else:
@@ -148,10 +124,8 @@ def main():
                 st.error(f"Error analyzing log file: {str(e)}")
                 return
         
-        # Display results
         st.success("✅ Analysis complete!")
         
-        # Key metrics
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -187,26 +161,20 @@ def main():
                 help="Number of different services in the logs"
             )
         
-        # Tabs for different views
         tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🔍 Anomalies", "📈 Analytics", "📄 Raw Data"])
         
         with tab1:
-            # Create visualizations
             create_dashboard(analyzer)
         
         with tab2:
-            # Anomaly details
             show_anomaly_details(anomalies_df)
         
         with tab3:
-            # Advanced analytics
             show_analytics(analyzer)
         
         with tab4:
-            # Raw data
             show_raw_data(analyzer)
         
-        # Download options
         st.header("📥 Download Results")
         col1, col2, col3 = st.columns(3)
         
@@ -232,7 +200,6 @@ def main():
             st.info("💡 Tip: Use the sample data to see how the system works!")
     
     else:
-        # Welcome screen
         st.markdown("""
         ## 🚀 Welcome to AI Log Anomaly Checker!
         
@@ -262,9 +229,6 @@ def main():
         """)
 
 def create_dashboard(analyzer):
-    """Create the main dashboard with visualizations"""
-    
-    # Log level distribution
     st.subheader("📊 Log Level Distribution")
     
     level_counts = {
@@ -274,7 +238,6 @@ def create_dashboard(analyzer):
         'UNKNOWN': analyzer.stats.get('unknown_count', 0)
     }
     
-    # Create pie chart
     fig_pie = px.pie(
         values=list(level_counts.values()),
         names=list(level_counts.keys()),
@@ -288,7 +251,6 @@ def create_dashboard(analyzer):
     )
     st.plotly_chart(fig_pie, use_container_width=True)
     
-    # Anomaly breakdown
     if analyzer.anomalies:
         st.subheader("🚨 Anomaly Breakdown")
         
@@ -305,7 +267,6 @@ def create_dashboard(analyzer):
         fig_bar.update_layout(height=400)
         st.plotly_chart(fig_bar, use_container_width=True)
     
-    # Service activity
     if analyzer.logs_data:
         st.subheader("🔧 Service Activity")
         
@@ -323,14 +284,12 @@ def create_dashboard(analyzer):
         st.plotly_chart(fig_service, use_container_width=True)
 
 def show_anomaly_details(anomalies_df):
-    """Show detailed anomaly information"""
     if anomalies_df is None or anomalies_df.empty:
         st.info("No anomalies detected! 🎉")
         return
     
     st.subheader("🔍 Detailed Anomaly Analysis")
     
-    # Filter options
     col1, col2 = st.columns(2)
     
     with col1:
@@ -341,7 +300,6 @@ def show_anomaly_details(anomalies_df):
         services = ['All'] + list(anomalies_df['service'].unique())
         selected_service = st.selectbox("Filter by Service", services)
     
-    # Apply filters
     filtered_df = anomalies_df.copy()
     
     if selected_type != 'All':
@@ -350,11 +308,9 @@ def show_anomaly_details(anomalies_df):
     if selected_service != 'All':
         filtered_df = filtered_df[filtered_df['service'] == selected_service]
     
-    # Display anomalies
     st.write(f"Showing {len(filtered_df)} anomalies")
     
     for idx, row in filtered_df.head(20).iterrows():
-        # Determine severity based on anomaly type
         if row['anomaly_type'] in ['CRITICAL_RESOURCE_USAGE', 'DATABASE_CONNECTION_ISSUE', 'MALFORMED_LOG']:
             css_class = "anomaly-high"
             icon = "🔴"
@@ -374,7 +330,6 @@ def show_anomaly_details(anomalies_df):
         """, unsafe_allow_html=True)
 
 def show_analytics(analyzer):
-    """Show advanced analytics"""
     st.subheader("📈 Advanced Analytics")
     
     if not analyzer.logs_data:
@@ -383,7 +338,6 @@ def show_analytics(analyzer):
     
     df = pd.DataFrame(analyzer.logs_data)
     
-    # Time-based analysis
     if 'timestamp' in df.columns and df['timestamp'].notna().any():
         st.subheader("⏰ Time-based Analysis")
         
@@ -398,7 +352,6 @@ def show_analytics(analyzer):
         )
         st.plotly_chart(fig_time, use_container_width=True)
     
-    # Message length analysis
     if 'message_length' in df.columns:
         st.subheader("📝 Message Length Analysis")
         
@@ -411,7 +364,6 @@ def show_analytics(analyzer):
         st.plotly_chart(fig_length, use_container_width=True)
 
 def show_raw_data(analyzer):
-    """Show raw log data"""
     st.subheader("📄 Raw Log Data")
     
     if not analyzer.logs_data:
@@ -420,7 +372,6 @@ def show_raw_data(analyzer):
     
     df = pd.DataFrame(analyzer.logs_data)
     
-    # Display options
     col1, col2 = st.columns(2)
     
     with col1:
@@ -429,21 +380,18 @@ def show_raw_data(analyzer):
     with col2:
         show_anomalies_only = st.checkbox("Show anomalies only", value=False)
     
-    # Filter data
     display_df = df.copy()
     
     if show_anomalies_only and analyzer.anomalies:
         anomaly_lines = [a['line_number'] for a in analyzer.anomalies]
         display_df = display_df[display_df['line_number'].isin(anomaly_lines)]
     
-    # Display table
     st.dataframe(
         display_df[['line_number', 'timestamp', 'level', 'service', 'message']].head(max_rows),
         use_container_width=True
     )
 
 def create_alert_summary(analyzer):
-    """Create alert summary text"""
     alert_text = f"""
 ALERT - Log Anomaly Detection Report
 ====================================

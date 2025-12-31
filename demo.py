@@ -9,7 +9,6 @@ import time
 from log_analyzer import LogAnalyzer
 
 def run_demo():
-    """Run a comprehensive demo of the log analyzer"""
     print("🎬 AI-Based Log Anomaly Checker - Demo")
     print("=" * 50)
     
@@ -70,7 +69,6 @@ def run_demo():
     print("Check the generated files to see detailed results and visualizations.")
 
 def show_anomaly_sample():
-    """Show a sample of detected anomalies"""
     print("\n🔍 Sample Anomalies Detected:")
     print("-" * 40)
     

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-AI-Based Log Anomaly Checker with Visual Alerts
-A comprehensive log analysis tool that detects anomalies using ML and pattern matching.
+Log Anomaly Checker - ML and pattern-based detection
 """
 
 import re
@@ -24,7 +23,6 @@ class LogAnalyzer:
         self.stats = {}
         
     def parse_logs(self):
-        """Parse log file and extract structured data"""
         print("📖 Parsing log file...")
         
         log_pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (\w+) \[(\w+)\] (.+)'
@@ -48,11 +46,9 @@ class LogAnalyzer:
                         'raw_line': line
                     }
                     
-                    # Extract additional features
                     log_entry.update(self._extract_features(message))
                     self.logs_data.append(log_entry)
                 else:
-                    # Handle malformed logs
                     self.logs_data.append({
                         'line_number': line_num,
                         'timestamp': None,
@@ -67,7 +63,6 @@ class LogAnalyzer:
         return self.logs_data
     
     def _extract_features(self, message):
-        """Extract numerical and categorical features from log message"""
         features = {
             'has_error_keywords': any(keyword in message.lower() for keyword in 
                                     ['error', 'failed', 'timeout', 'deadlock', 'exhausted', 'lost']),
@@ -87,18 +82,15 @@ class LogAnalyzer:
             'has_cpu_usage': 'cpu usage' in message.lower()
         }
         
-        # Extract execution time if present
         time_match = re.search(r'(\d+\.?\d*)s execution time', message)
         features['execution_time'] = float(time_match.group(1)) if time_match else 0
         
-        # Extract percentage values
         pct_match = re.search(r'(\d+)%', message)
         features['percentage_value'] = int(pct_match.group(1)) if pct_match else 0
         
         return features
     
     def detect_anomalies_ml(self):
-        """Use Machine Learning to detect anomalies"""
         print("🤖 Running ML anomaly detection...")
         
         if not self.logs_data:
@@ -106,7 +98,6 @@ class LogAnalyzer:
         
         df = pd.DataFrame(self.logs_data)
         
-        # Prepare features for ML
         feature_columns = [
             'has_error_keywords', 'has_warning_keywords', 'has_success_keywords',
             'message_length', 'word_count', 'has_numbers', 'has_urls', 'has_ips',
@@ -114,23 +105,17 @@ class LogAnalyzer:
             'has_cpu_usage', 'execution_time', 'percentage_value'
         ]
         
-        # Handle missing values
         for col in feature_columns:
             if col in df.columns:
                 df[col] = df[col].fillna(0)
         
-        # Create feature matrix
         X = df[feature_columns].values
-        
-        # Standardize features
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
         
-        # Apply Isolation Forest
         iso_forest = IsolationForest(contamination=0.1, random_state=42)
         anomaly_labels = iso_forest.fit_predict(X_scaled)
         
-        # Mark anomalies
         for i, (idx, row) in enumerate(df.iterrows()):
             if anomaly_labels[i] == -1:
                 self.anomalies.append({
@@ -147,7 +132,6 @@ class LogAnalyzer:
         return self.anomalies
     
     def detect_anomalies_patterns(self):
-        """Use pattern-based rules to detect anomalies"""
         print("🔍 Running pattern-based anomaly detection...")
         
         pattern_anomalies = []
@@ -166,7 +150,6 @@ class LogAnalyzer:
                 })
                 continue
             
-            # High error rate detection
             if log['level'] == 'ERROR':
                 pattern_anomalies.append({
                     'line_number': log['line_number'],
@@ -179,7 +162,6 @@ class LogAnalyzer:
                     'raw_line': log['raw_line']
                 })
             
-            # Critical resource usage
             if log.get('percentage_value', 0) > 90:
                 pattern_anomalies.append({
                     'line_number': log['line_number'],
@@ -192,7 +174,6 @@ class LogAnalyzer:
                     'raw_line': log['raw_line']
                 })
             
-            # Slow query detection
             if log.get('execution_time', 0) > 3.0:
                 pattern_anomalies.append({
                     'line_number': log['line_number'],
@@ -205,7 +186,6 @@ class LogAnalyzer:
                     'raw_line': log['raw_line']
                 })
             
-            # Database connection issues
             if any(keyword in log['message'].lower() for keyword in 
                    ['connection timeout', 'connection pool exhausted', 'connection lost']):
                 pattern_anomalies.append({
@@ -219,7 +199,6 @@ class LogAnalyzer:
                     'raw_line': log['raw_line']
                 })
             
-            # Authentication failures
             if any(keyword in log['message'].lower() for keyword in 
                    ['invalid token', 'token expired', 'authentication failed']):
                 pattern_anomalies.append({
@@ -233,12 +212,10 @@ class LogAnalyzer:
                     'raw_line': log['raw_line']
                 })
         
-        # Add pattern anomalies to main anomalies list
         self.anomalies.extend(pattern_anomalies)
         return pattern_anomalies
     
     def calculate_statistics(self):
-        """Calculate log statistics"""
         print("📊 Calculating statistics...")
         
         if not self.logs_data:
@@ -262,21 +239,16 @@ class LogAnalyzer:
         return self.stats
     
     def generate_report(self):
-        """Generate comprehensive anomaly report"""
         print("📋 Generating anomaly report...")
         
         if not self.anomalies:
             print("✅ No anomalies detected!")
             return
         
-        # Create DataFrame for anomalies
         anomalies_df = pd.DataFrame(self.anomalies)
-        
-        # Save to CSV
         anomalies_df.to_csv('anomaly_report.csv', index=False)
         print(f"✅ Anomaly report saved to anomaly_report.csv")
         
-        # Print summary
         print(f"\n🔍 ANOMALY DETECTION SUMMARY")
         print(f"{'='*50}")
         print(f"📊 Total log entries scanned: {self.stats.get('total_entries', 0)}")
@@ -292,7 +264,6 @@ class LogAnalyzer:
         return anomalies_df
     
     def create_visualizations(self):
-        """Create visual charts and graphs"""
         print("📊 Creating visualizations...")
         
         if not self.logs_data:
@@ -301,24 +272,20 @@ class LogAnalyzer:
         
         df = pd.DataFrame(self.logs_data)
         
-        # Set up the plotting style
         plt.style.use('seaborn-v0_8')
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         fig.suptitle('Log Analysis Dashboard', fontsize=16, fontweight='bold')
         
-        # 1. Log Level Distribution
         level_counts = df['level'].value_counts()
         axes[0, 0].pie(level_counts.values, labels=level_counts.index, autopct='%1.1f%%', startangle=90)
         axes[0, 0].set_title('Log Level Distribution')
         
-        # 2. Service Activity
         service_counts = df['service'].value_counts().head(10)
         axes[0, 1].bar(range(len(service_counts)), service_counts.values)
         axes[0, 1].set_title('Top 10 Services by Log Count')
         axes[0, 1].set_xticks(range(len(service_counts)))
         axes[0, 1].set_xticklabels(service_counts.index, rotation=45, ha='right')
         
-        # 3. Timeline of Logs
         if df['timestamp'].notna().any():
             df_with_time = df[df['timestamp'].notna()].copy()
             df_with_time['minute'] = df_with_time['timestamp'].dt.floor('min')
@@ -329,7 +296,6 @@ class LogAnalyzer:
             axes[1, 0].set_ylabel('Log Count per Minute')
             axes[1, 0].tick_params(axis='x', rotation=45)
         
-        # 4. Anomaly Distribution
         if self.anomalies:
             anomalies_df = pd.DataFrame(self.anomalies)
             anomaly_counts = anomalies_df['anomaly_type'].value_counts()
@@ -349,13 +315,10 @@ class LogAnalyzer:
         return fig
     
     def send_alerts(self, email_config=None):
-        """Send alerts via console, file, and optionally email"""
         print("🚨 Generating alerts...")
         
-        # Console alert
         print(f"\n🚨 ALERT: {self.stats.get('anomaly_count', 0)} anomalies detected in log analysis!")
         
-        # File alert
         alert_message = f"""
 ALERT - Log Anomaly Detection Report
 ====================================
@@ -376,25 +339,22 @@ Critical Issues Found:
         if self.anomalies:
             critical_anomalies = [a for a in self.anomalies if a.get('anomaly_type') in 
                                 ['CRITICAL_RESOURCE_USAGE', 'DATABASE_CONNECTION_ISSUE', 'MALFORMED_LOG']]
-            for anomaly in critical_anomalies[:5]:  # Show top 5 critical issues
+            for anomaly in critical_anomalies[:5]:
                 alert_message += f"- Line {anomaly['line_number']}: {anomaly['anomaly_type']} - {anomaly['message'][:100]}...\n"
         else:
             alert_message += "No critical issues detected.\n"
         
-        # Save alert to file
         with open('alerts.txt', 'w') as f:
             f.write(alert_message)
         
         print("✅ Alert saved to alerts.txt")
         
-        # Optional email alert (if configured)
         if email_config:
             self._send_email_alert(alert_message, email_config)
         
         return alert_message
     
     def _send_email_alert(self, message, email_config):
-        """Send email alert (requires SMTP configuration)"""
         try:
             import smtplib
             from email.mime.text import MIMEText
@@ -419,27 +379,15 @@ Critical Issues Found:
             print(f"❌ Failed to send email alert: {e}")
     
     def run_analysis(self, email_config=None):
-        """Run complete log analysis pipeline"""
         print("🚀 Starting AI-Based Log Anomaly Analysis")
         print("=" * 50)
         
-        # Parse logs
         self.parse_logs()
-        
-        # Detect anomalies using both methods
         self.detect_anomalies_ml()
         self.detect_anomalies_patterns()
-        
-        # Calculate statistics
         self.calculate_statistics()
-        
-        # Generate report
         self.generate_report()
-        
-        # Create visualizations
         self.create_visualizations()
-        
-        # Send alerts
         self.send_alerts(email_config)
         
         print("\n✅ Analysis complete!")
@@ -449,7 +397,6 @@ Critical Issues Found:
 
 
 def main():
-    """Main function to run the log analyzer"""
     import argparse
     
     parser = argparse.ArgumentParser(description='AI-Based Log Anomaly Checker')
@@ -457,29 +404,25 @@ def main():
     parser.add_argument('--email', help='Email address for alerts (optional)')
     args = parser.parse_args()
     
-    # Initialize analyzer
     analyzer = LogAnalyzer(args.log_file)
     
-    # Optional email configuration
     email_config = None
     if args.email:
         import os
-        # Try to load .env file if python-dotenv is available
         try:
             from dotenv import load_dotenv
             load_dotenv()
         except ImportError:
-            pass  # .env loading is optional
+            pass
         
         email_config = {
-            'from_email': os.getenv('SMTP_FROM_EMAIL', 'subhadramishrag@gmail.com'),  # Use env var or default
+            'from_email': os.getenv('SMTP_FROM_EMAIL', 'subhadramishrag@gmail.com'),
             'to_email': args.email,
             'smtp_server': os.getenv('SMTP_SERVER', 'smtp.gmail.com'),
             'smtp_port': int(os.getenv('SMTP_PORT', '587')),
-            'password': os.getenv('SMTP_PASSWORD', 'your_app_password')  # Must set via environment variable
+            'password': os.getenv('SMTP_PASSWORD', 'your_app_password')
         }
     
-    # Run analysis
     analyzer.run_analysis(email_config)
 
 
